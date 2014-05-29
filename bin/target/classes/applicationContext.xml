@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.2.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+           http://www.springframework.org/schema/jdbc 
+           http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+           http://www.springframework.org/schema/task           
+           http://www.springframework.org/schema/task/spring-task-3.2.xsd">
+      
+      	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+	     
+	
+	<context:component-scan base-package="com.megaeyes.fin">
+		<context:include-filter type="regex" expression=".dao.*"/>
+		<context:include-filter type="regex" expression=".service..*(..)"/>
+	</context:component-scan>
+
+		
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+	        <property name="driverClass" value="oracle.jdbc.driver.OracleDriver"/>
+	        <property name="jdbcUrl" value="jdbc:oracle:thin:@25.30.5.172:1521:mega"/>
+	        <property name="user" value="megaccb"/>
+	        <property name="password" value="megaccb"/>
+	                
+	        <property name="minPoolSize" value="10"/>
+	        <property name="maxPoolSize" value="20"/>
+	        <property name="idleConnectionTestPeriod" value="300"/>
+	        <property name="maxStatements" value="0"/>
+			  
+		</bean> 
+	     
+	
+	
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.megaeyes.fin.po" />
+		<property name="mapperLocations" value="classpath*:/mybatis/**/*Mapper.xml" />
+	    <property name="configurationProperties">
+	        <props>
+	            <prop key="dialect">oracle</prop>
+	        </props>
+	    </property>
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" 	value="com.megaeyes.fin.dao" />
+		<property name="annotationClass" value="com.megaeyes.fin.dao.core.MyBatisRepository"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	
+	<task:executor id="executor" pool-size="5" />
+	<task:scheduler id="scheduler" pool-size="10" />
+	<task:annotation-driven executor="executor" scheduler="scheduler" />
+	
+	<!-- 
+   <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"  init-method="init" destroy-method="close"> 
+		  	<property name="url" value="jdbc:log4jdbc:oracle:thin:@25.30.5.172:1521:mega" />
+			<property name="driverClassName" value="net.sf.log4jdbc.DriverSpy" />
+			<property name="validationQuery" value="select 1 from dual"/>
+			<property name="username" value="megaccb" />
+			<property name="password" value="megaccb" />
+			
+	</bean> -->
+	
+	 <bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+	    <property name="defaultErrorView"><value>forward:exception.do?flag=defaultException</value></property>
+	    <property name="exceptionMappings">
+	       <props>
+	           <prop key="com.megaeyes.fin.exception.MegaException">forward:exception.do?flag=MyException</prop>
+	           <prop key="javax.xml.bind.JAXBException">forward:exception.do?flag=XmlException</prop>
+	           <prop key="java.sql.SQLException">forward:exception.do?flag=DbException</prop> 
+	           <prop key="java.lang.RuntimeException">forward:exception.do?flag=RuntimeException</prop>
+	       </props>
+	    </property>
+	</bean>	
+	
+	<bean id="myLogAOP" class="com.megaeyes.fin.aop.MegaOpterAOP"></bean>
+	<aop:config>
+		<aop:aspect id="abcd" ref="myLogAOP">
+		<aop:pointcut id="myPointcut" expression="execution(* com.fin.service.*.*(..))"/>
+		<aop:after-returning pointcut-ref="myPointcut" method="megaLog"/>
+		<aop:after-throwing pointcut-ref="myPointcut" method="exceptionLog"/>
+		</aop:aspect>
+	</aop:config>
+	
+</beans>

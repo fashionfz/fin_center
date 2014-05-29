@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//
+EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.megaeyes.fin.dao.TabletEventDAO">
+
+ <select id="" resultType="TabletEvent" >
+
+ </select>
+ 
+ <insert id="insetEventLog" parameterType="TabletEvent">
+insert into FIN_MBOX_EVENT(id,tablet_id, tablet_name, tablet_address, event_number, begin_time, 
+end_time,type) 
+values(#{id,jdbcType=VARCHAR},#{tabletId,jdbcType=BIGINT},
+#{tabletName,jdbcType=VARCHAR},#{tabletAddress,jdbcType=VARCHAR},
+#{code,jdbcType=VARCHAR},#{beginTime,jdbcType=TIMESTAMP},
+#{endTime,jdbcType=TIMESTAMP},#{type,jdbcType=INTEGER})
+ </insert>
+ 
+  <insert id="beginEventLog" parameterType="TabletEvent">
+insert into FIN_MBOX_EVENT(id,tablet_id, tablet_name, tablet_address, event_number, begin_time) 
+values(#{id,jdbcType=VARCHAR},#{tabletId,jdbcType=BIGINT},#{tabletName,jdbcType=VARCHAR},
+#{address,jdbcType=VARCHAR},0,
+#{beginTime,jdbcType=TIMESTAMP})
+ </insert>
+ 
+ 
+  <insert id="addEventMboxUser" parameterType="java.util.Map">
+insert into FIN_MBOX_R_EVENT_MBOXUSER(ID,EVENT_ID,MBOX_USER_ID,T_TIME) 
+values(FIN_SEQ_MBOX_R_EVENT_USER.nextval,#{eventId,jdbcType=VARCHAR},#{mboxUserId,jdbcType=BIGINT},#{brushTime,jdbcType=TIMESTAMP})
+ </insert>
+ 
+ <insert id="addEventNotifyUser" parameterType="java.util.Map">
+ insert into FIN_MBOX_R_EVENT_USER(ID,EVENT_ID,USER_ID) 
+values(FIN_SEQ_MBOX_R_EVENT_USER.nextval,#{eventId},#{userId})
+ </insert>
+ 
+ <insert id="addEventCamara" parameterType="java.util.Map">
+ insert into FIN_MBOX_R_EVENT_VIC(id,EVENT_ID,VIC_ID) 
+ values(FIN_SEQ_MBOX_R_EVENT_VIC.nextval,#{eventId},#{vicId})
+ </insert>
+ 
+ <update id="updateStatus" parameterType="String">
+ update FIN_MBOX_EVENT set TYPE=1 where id = #{eventId}
+ </update>
+ 
+ <update id="endEventLog" parameterType="java.util.Map">
+ update FIN_MBOX_EVENT set end_time =#{endTime,jdbcType=TIMESTAMP} 
+ where id =#{eventId,jdbcType=VARCHAR}
+ </update>
+ 
+ <select id="getTabletEvent" resultType="TabletEvent">
+select id as id, tablet_id as tabletId, tablet_name as tabletName, 
+tablet_address as tabletAddress, event_number as code, begin_time as beginTime, 
+end_time as endTime, type as type, content as dealContent, 
+deal_user as dealUserId, deal_username as dealUserName, 
+deal_time as dealTime from fin_mbox_event
+ </select>
+ 
+<select id="getIntransferEvent" resultType="TabletEvent">
+select id as id, tablet_id as tabletId, tablet_name as tabletName, 
+tablet_address as tabletAddress, event_number as code, begin_time as beginTime, 
+end_time as endTime, type as type, content as dealContent, 
+deal_user as dealUserId, deal_username as dealUserName, 
+deal_time as dealTime from fin_mbox_event where end_time is NULL
+ </select>
+ 
+ <select id="getMboxUser" parameterType="String" resultType="TabletUser">
+select u.id as id, u.name as name, u.user_number as userNumber, 
+u.code_type as codeType, u.code as code, u.compy as compy, u.image as photo, 
+u.image_type as photoType, '' as fingerPrint, '' as fingerPrint2, 
+'' as fingerPrintType, u.phone as phone, u.note as note,r.t_time as brushTime
+from fin_mbox_user u,FIN_MBOX_R_EVENT_MBOXUSER r where u.id=r.mbox_user_id and r.event_id=#{eventId}
+ </select>
+ 
+</mapper>

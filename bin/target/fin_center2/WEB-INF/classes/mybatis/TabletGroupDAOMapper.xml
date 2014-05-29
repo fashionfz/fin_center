@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//
+EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.megaeyes.fin.dao.TabletGroupDAO">
+
+ <select id="queryTabletGroup" resultType="TabletGroup" >
+ select id, name, status, create_time as createTime, user_id as createUser from FIN_MBOX_TABLET_GROUP
+ </select>
+ 
+ <insert id="insertTabletGroup" parameterType="TabletGroup">
+   <selectKey resultType="long" keyProperty="id" order="BEFORE"> 
+    SELECT FIN_SEQ_MBOX_TABLET_GROUP.nextval AS id FROM DUAL
+   </selectKey> 
+ insert into FIN_MBOX_TABLET_GROUP (id,name,status,create_time,user_id) 
+ values(#{id},#{name},1,sysdate,#{createUser})
+
+ </insert>
+ 
+ 
+ <update id="updateTabletGroup" parameterType="java.util.Map">
+ update FIN_MBOX_TABLET_GROUP set name=#{name,jdbcType=VARCHAR}
+ </update>
+ 
+ <delete id="removeTabletGroup" parameterType="String">
+ delete from FIN_MBOX_TABLET_GROUP where id=#{id}
+ </delete>
+ 
+  <delete id="clearGroupUser" parameterType="String">
+    delete from FIN_MBOX_R_GROUP_USER where GROUP_ID = #{groupId}
+ </delete>
+ 
+ <delete id="clearGroupTablet" parameterType="String">
+    delete from FIN_MBOX_R_GROUP_TABLET where GROUP_ID = #{groupId}
+ </delete>
+ 
+ <insert id="insertGroupUser" parameterType="java.util.Map">
+ insert into FIN_MBOX_R_GROUP_USER(ID,GROUP_ID,USER_ID) 
+ values(SEQ_FIN_MBOX_R_GROUP_TABLET.nextval,#{groupId},#{userId,jdbcType=VARCHAR})
+ </insert>
+ 
+ <insert id="insertGroupTablet" parameterType="java.util.Map">
+ insert into FIN_MBOX_R_GROUP_TABLET(ID,GROUP_ID,TABLET_ID) 
+ values(SEQ_FIN_MBOX_R_GROUP_TABLET.nextval,#{groupId},#{tabletId})
+ </insert>
+ 
+ <select id="queryGroupUser" resultType="User">
+ select u.id,u.f_name as userName,u.logon_name as logonName,u.naming as naming 
+ from t_user u,FIN_MBOX_R_GROUP_USER r where u.id=r.USER_ID and r.GROUP_ID = #{groupId}
+ </select>
+ 
+ <select id="queryGroupUserByTabletId" resultType="User">
+  select u.id,u.f_name as userName,u.logon_name as logonName,u.naming as naming 
+ from t_user u,FIN_MBOX_R_GROUP_USER r where u.id=r.USER_ID and r.TABLET_ID = #{tabletId}
+ </select>
+ 
+  <select id="queryGroupTablet" resultType="Tablet">
+  select 
+ t.id as id, 
+ t.DEVICE_NUMBER as deviceNumber, 
+ t.name as name, 
+ t.address as address, 
+ t.device_ip as ip, 
+ t.link_man as linkMan, 
+ t.phone as phone, 
+ t.status as status, 
+ t.create_time as createTime, 
+ o.deal_stauts as dealStatus, 
+ o.lock_status as lockStatus, 
+ o.lock_user as lockUser, 
+ o.client_mac as clientMac, 
+ o.lock_time as lockTime, 
+ o.line_status as lineStatus  
+ from FIN_MBOX_R_GROUP_TABLET r,FIN_MBOX_TABLET t
+ left join FIN_MBOX_TABLET_OPT o on t.id=o.id where r.TABLET_ID = t.id and r.GROUP_ID = #{groupId}
+ </select>
+</mapper>

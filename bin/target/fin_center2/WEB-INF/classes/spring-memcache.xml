@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+   xsi:schemaLocation="http://www.springframework.org/schema/beans 
+   http://www.springframework.org/schema/beans/spring-beans.xsd 
+     http://www.springframework.org/schema/cache 
+     http://www.springframework.org/schema/cache/spring-cache.xsd" default-autowire="byName" default-lazy-init="false">
+<cache:annotation-driven cache-manager="cacheManager"/> 
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:memcache.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="memcachedPool" class="com.danga.MemCached.SockIOPool" factory-method="getInstance" init-method="initialize" destroy-method="shutDown">
+		<constructor-arg value="vmarsMemcachedPool" />
+		<property name="servers">
+		    <!-- memcached 服务集群 -->
+			<list>
+				<value>25.30.5.100:1111</value>				
+			</list>
+		</property>
+		<property name="initConn">
+			<value>20</value>
+		</property>
+		<property name="minConn">
+			<value>10</value>
+		</property>
+		<property name="maxConn">
+			<value>50</value>
+		</property>
+		<property name="maintSleep">
+			<value>30000</value>
+		</property>
+		<property name="nagle">
+			<value>false</value>
+		</property>
+		<property name="socketTO">
+			<value>3000</value>
+		</property>
+	</bean>
+	<bean id="memcachedClient" class="com.danga.MemCached.MemCachedClient">
+		<constructor-arg value="vmarsMemcachedPool" />
+	</bean>
+	
+	
+	<bean id="cacheManager" class="com.megaeyes.fin.cache.MemcacheCacheManager">
+	<property name="client" value="memcachedClient" />
+	<property name="caches">
+		<set>
+			<bean class="com.megaeyes.fin.cache.TyMemcaheCache">
+				<property name="name" value="memcache" />
+				<property name="client" ref="memcachedClient" />
+			</bean>
+		</set>
+	</property>
+</bean>
+	
+</beans>

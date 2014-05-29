@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//
+EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.megaeyes.fin.dao.TabletDAO">
+
+ <select id="queryTablet" resultType="Tablet" >
+ select 
+ t.id as id, 
+ t.DEVICE_NUMBER as deviceNumber, 
+ t.name as name, 
+ t.address as address, 
+ t.device_ip as ip, 
+ t.link_man as linkMan, 
+ t.phone as phone, 
+ t.status as status, 
+ t.create_time as createTime, 
+ o.deal_stauts as dealStatus, 
+ o.lock_status as lockStatus, 
+ o.lock_user as lockUser, 
+ o.client_mac as clientMac, 
+ o.lock_time as lockTime, 
+ o.line_status as lineStatus  
+ from FIN_MBOX_TABLET t
+ left join FIN_MBOX_TABLET_OPT o on t.id=o.id
+ </select>
+ 
+ <insert id="insertTablet" parameterType="Tablet">
+   <selectKey resultType="long" keyProperty="id" order="BEFORE"> 
+    SELECT FIN_SEQ_MBOX_TABLET.nextval AS id FROM DUAL
+   </selectKey>
+		INSERT INTO FIN_MBOX_TABLET (id,DEVICE_NUMBER,name,address,device_ip,DEVICE_PORT,link_man,phone,status,create_time) 
+		VALUES (#{id}, #{deviceNumber,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},
+		#{address,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR},#{port,jdbcType=INTEGER},
+		#{linkMan,jdbcType=VARCHAR},#{phone,jdbcType=VARCHAR},1,sysdate)
+ </insert>
+ 
+ 
+ <insert id="insertTabletStatus" parameterType="Tablet">
+INSERT INTO fin_mbox_tablet_opt(id, line_status, deal_stauts, lock_status) 
+values(#{id},1,0,0) 
+ </insert>
+ 
+ 
+ <update id="modifyTablet" parameterType="java.util.Map">
+    update FIN_MBOX_TABLET set name=#{name},address=#{address} where id=#{tabletId}
+ </update>
+ 
+ <delete id="deleteCamara" parameterType="String">
+    delete from FIN_R_TABLET_VIC where TABLET_ID = #{tabletId}
+ </delete>
+ 
+ <insert id="insertCamara" parameterType="java.util.Map">
+    insert into FIN_R_TABLET_VIC(id,TABLET_ID,VIC_ID) values(SEQ_MBOX_R_TABLET_VIC.nextval,#{tabletId},#{vicId})
+ </insert>
+ 
+ <select id="getCamaraByTabletId" parameterType="String" resultType="VideoInputChannel">
+    select v.id as id,v.f_name as name,v.naming as naming from video_input_channel v,fin_r_tablet_vic r,FIN_MBOX_TABLET t 
+    where v.id=r.vic_id and r.tablet_id=t.id and t.id=#{tabletId}
+ </select>
+ 
+ <update id="modifyTabletStatus" parameterType="java.util.Map">
+ update FIN_MBOX_TABLET set status = #{status} where id = #{tabletId}
+ </update>
+ 
+ <update id="modifyTabletOnline" parameterType="java.util.Map">
+ update FIN_MBOX_TABLET_OPT set LINE_STATUS=#{lineStatus} where ID = #{tabletId}
+ </update>
+ 
+</mapper>

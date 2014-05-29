@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//
+EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.megaeyes.fin.dao.TabletEventDAO">
+
+ <select id="" resultType="TabletEvent" >
+
+ </select>
+ 
+ <insert id="insetEventLog" parameterType="TabletEvent">
+insert into(id, tablet_id, tablet_name, tablet_address, event_number, begin_time, 
+end_time, type) 
+values(FIN_SEQ_MBOX_EVENT.nextval,#{tabletId},#{tabletName},#{tabletAddress},#{code},#{beginTime},
+#{endTime},#{type})
+ </insert>
+ 
+ 
+  <insert id="addEventUser" parameterType="java.util.Map">
+insert into(ID,EVENT_ID,USER_ID,T_TIME) 
+values(FIN_SEQ_MBOX_R_EVENT_USER.nextval,#{eventId},#{userId},#{brushTime})
+ </insert>
+ 
+</mapper>

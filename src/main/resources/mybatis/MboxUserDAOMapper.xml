@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//
+EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.megaeyes.fin.dao.MboxUserDAO">
+
+ <select id="getMboxUser" resultType="TabletUser" parameterType="java.util.Map">
+select id as id, name as name, user_number as userNumber, 
+code_type as codeType, code as code, compy as compy, image as photo, 
+image_type as photoType, finger as fingerPrint, finger2 as fingerPrint2, 
+finger_type as fingerPrintType, phone as phone, note as note from fin_mbox_user where status =1 
+<if test="userName != null and userName != ''">
+ and name like '%'||#{userName}||'%' 
+</if>
+<if test="identityNumber != null and identityNumber != ''">
+ and code like '%'||#{identityNumber}||'%'
+</if>
+ </select>
+ 
+ 
+ <select id="checkTabletUser" resultType="int" parameterType="TabletUser">
+select count(id) from fin_mbox_user where code=#{code} and status=1
+ </select>
+ 
+ 
+ <insert id="insertUser" parameterType="TabletUser">
+   <selectKey resultType="long" keyProperty="id" order="BEFORE"> 
+    SELECT FIN_SEQ_MBOX_USER.nextval AS id FROM DUAL
+   </selectKey> 
+ insert into fin_mbox_user (id, name, user_number, code_type, code, compy, 
+ image, image_type, finger, finger2, finger_type, phone, note, status,create_time,modify_time) 
+ values(#{id},#{name},#{userNumber},#{codeType},#{code},#{compy},
+ #{photo},#{photoType},#{fingerPrint},#{fingerPrint2},#{fingerPrintType},
+ #{phone},#{note},1,sysdate,sysdate)
+ </insert>
+ 
+ 
+ <update id="removeUser" parameterType="Long">
+ update fin_mbox_user set status=0 where id=#{userId,jdbcType=BIGINT}
+ </update>
+ 
+ <select id="getLastUpdateTime" resultType="java.util.Date">
+ select max(modify_time) from fin_mbox_user
+ </select>
+ 
+ <select id="getUpdateUser" parameterType="java.util.Date" resultType="TabletUser">
+select id as id, name as name, user_number as userNumber, 
+code_type as codeType, code as code, compy as compy, image as photo, 
+image_type as photoType, finger as fingerPrint, finger2 as fingerPrint2, 
+finger_type as fingerPrintType, phone as phone, note as note from fin_mbox_user where status =1
+and modify_time > #{update}
+ </select>
+ 
+</mapper>

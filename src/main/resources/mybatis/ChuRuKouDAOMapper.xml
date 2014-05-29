@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//
+EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.megaeyes.fin.dao.ChuRuKouDAO">
+ 
+ <select id="querySpecialOrganDoors" resultType="DeviceAndDoor">
+ select c.id as deviceId,o.id as organId,o.f_name as organName,c.name as deviceName,
+c.device_number as deviceNo,c.model_type as manufacture,d.id as doorId,
+d.channel_id as channel,d.f_name as doorName  
+from additional_accessorial_device d,additional_primary_device c,r_organ_devices r,organ o 
+where d.parent_id=c.id and d.id=r.device_id and r.organ_id=o.id
+ </select>
+ 
+ <select id="queryDetailDoorStatus">
+ </select>
+ 
+ <select id="createOrModifyDoorGroup">
+ </select>
+ 
+   <select id="UpdateDoorGroupStatus">
+ </select>
+ 
+ <select id="deleteDoorGroup">
+ </select>
+ 
+ <select id="querySpecialDoorGroup">
+ </select>
+   
+   
+    <select id="queryGroupForAssignedDevice">
+ </select>
+ 
+  <select id="queryGroupStrategy">
+ </select>
+ 
+  <select id="saveGroupStrategy">
+ </select>
+ 
+  <select id="LockOrUnLockDoorEvent">
+ </select>
+ 
+  <select id="saveAssociateCameral">
+ </select>
+ 
+  <select id="queryAssociateCameral">
+ </select>
+</mapper>
